@@ -1,0 +1,38 @@
+{
+    "name": "darkeum/dpot",
+    "description": "Файлы Docker для запуска базового приложения Darklyy.",
+    "keywords": ["darklyy", "docker"],
+    "license": "MIT",
+    "authors": [{
+        "name": "Komarov Ivan",
+        "email": "ki@darkeum.ru",
+        "homepage": "https://darkeum.ru",
+        "role": "Developer"
+    }],
+    "require": {
+        "php": "^7.3|^8.0"
+    },
+    "bin": [
+        "bin/sail"
+    ],
+    "autoload": {
+        "psr-4": {
+            "Darkeum\\Dpot\\": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.x-dev"
+        },
+        "darkeum": {
+            "providers": [
+                "Darkeum\\Dpot\\DpotServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
