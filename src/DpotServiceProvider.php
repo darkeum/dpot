@@ -1,13 +1,13 @@
 <?php
 
-namespace Darkeum\Dpot\Sail;
+namespace Darkeum\Dpot;
 
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Boot\Support\ServiceProvider;
 use Darkeum\Dpot\Console\InstallCommand;
 use Darkeum\Dpot\Console\PublishCommand;
 
-class SailServiceProvider extends ServiceProvider implements DeferrableProvider
+class DpotServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     /**
      * Запуск сервис провайдера

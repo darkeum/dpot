@@ -2,7 +2,7 @@
 
 UNAMEOUT="$(uname -s)"
 
-# Verify operating system is supported...
+# Убедитесь, что операционная система поддерживается...
 case "${UNAMEOUT}" in
     Linux*)             MACHINE=linux;;
     Darwin*)            MACHINE=mac;;
@@ -15,9 +15,9 @@ if [ "$MACHINE" == "UNKNOWN" ]; then
     exit 1
 fi
 
-# Determine if stdout is a terminal...
+# Определить, является ли стандартный вывод терминалом...
 if test -t 1; then
-    # Determine if colors are supported...
+    # Определить, поддерживаются ли цвета...
     ncolors=$(tput colors)
 
     if test -n "$ncolors" && test "$ncolors" -ge 8; then
@@ -28,7 +28,7 @@ if test -t 1; then
     fi
 fi
 
-# Function that prints the available commands...
+# Функция, которая печатает доступные команды...
 function display_help {
     echo "DPOT"
     echo
@@ -91,34 +91,34 @@ else
     display_help
 fi
 
-# Source the ".env" file so Laravel's environment variables are available...
+# Подключаем исходный файл ".env", чтобы были доступны переменные окружения Darklyy...
 if [ -f ./.env ]; then
     source ./.env
 fi
 
-# Define environment variables...
+# Определение переменных среды...
 export APP_PORT=${APP_PORT:-80}
-export APP_SERVICE=${APP_SERVICE:-"laravel.test"}
+export APP_SERVICE=${APP_SERVICE:-"dpot"}
 export DB_PORT=${DB_PORT:-3306}
 export WWWUSER=${WWWUSER:-$UID}
 export WWWGROUP=${WWWGROUP:-$(id -g)}
 
-export SAIL_FILES=${SAIL_FILES:-""}
-export SAIL_SHARE_DASHBOARD=${SAIL_SHARE_DASHBOARD:-4040}
-export SAIL_SHARE_SERVER_HOST=${SAIL_SHARE_SERVER_HOST:-"laravel-sail.site"}
-export SAIL_SHARE_SERVER_PORT=${SAIL_SHARE_SERVER_PORT:-8080}
-export SAIL_SHARE_SUBDOMAIN=${SAIL_SHARE_SUBDOMAIN:-""}
+export DPOT_FILES=${DPOT_FILES:-""}
+export DPOT_SHARE_DASHBOARD=${DPOT_SHARE_DASHBOARD:-4040}
+export DPOT_SHARE_SERVER_HOST=${DPOT_SHARE_SERVER_HOST:-"darklyy-dpot.site"}
+export DPOT_SHARE_SERVER_PORT=${DPOT_SHARE_SERVER_PORT:-8080}
+export DPOTL_SHARE_SUBDOMAIN=${DPOT_SHARE_SUBDOMAIN:-""}
 
-# Function that outputs Sail is not running...
-function sail_is_not_running {
-    echo "${BOLD}Sail is not running.${NC}" >&2
+# Функция, которая выводит что DPOT, не запущена...
+function dpot_is_not_running {
+    echo "${BOLD}DPOT не запущен.${NC}" >&2
     echo "" >&2
-    echo "${BOLD}You may Sail using the following commands:${NC} './vendor/bin/sail up' or './vendor/bin/sail up -d'" >&2
+    echo "${BOLD}Для запуска можно использовать следующие команды:${NC} './vendor/bin/sail up' or './vendor/bin/sail up -d'" >&2
 
     exit 1
 }
 
-# Define Docker Compose command prefix...
+# Определить префикс команды Docker Compose...
 docker compose &> /dev/null
 if [ $? == 0 ]; then
     DOCKER_COMPOSE=(docker compose)
@@ -126,15 +126,15 @@ else
     DOCKER_COMPOSE=(docker-compose)
 fi
 
-if [ -n "$SAIL_FILES" ]; then
-    # Convert SAIL_FILES to an array...
-    SAIL_FILES=("${SAIL_FILES//:/ }")
+if [ -n "$DPOT_FILES" ]; then
+    # Преобразование DPOT_FILES в массив...
+    DPOT_FILES=("${DPOT_FILES//:/ }")
 
-    for FILE in "${SAIL_FILES[@]}"; do
+    for FILE in "${DPOT_FILES[@]}"; do
         if [ -f "$FILE" ]; then
             DOCKER_COMPOSE+=(-f "$FILE")
         else
-            echo "${BOLD}Unable to find Docker Compose file: '${FILE}'${NC}" >&2
+            echo "${BOLD}Не удалось найти файл Docker Compose: '${FILE}'${NC}" >&2
 
             exit 1
         fi
@@ -143,17 +143,17 @@ fi
 
 EXEC="yes"
 
-if [ -z "$SAIL_SKIP_CHECKS" ]; then
-    # Ensure that Docker is running...
+if [ -z "$DPOT_SKIP_CHECKS" ]; then
+    # Убедитесь, что Docker запущен...
     if ! docker info > /dev/null 2>&1; then
-        echo "${BOLD}Docker is not running.${NC}" >&2
+        echo "${BOLD}Docker не запущен.${NC}" >&2
 
         exit 1
     fi
 
-    # Determine if Sail is currently up...
+    # Определить, работает ли DPOT...
     if "${DOCKER_COMPOSE[@]}" ps "$APP_SERVICE" 2>&1 | grep 'Exit\|exited'; then
-        echo "${BOLD}Shutting down old Sail processes...${NC}" >&2
+        echo "${BOLD}Отключение старых процессов DPOT...${NC}" >&2
 
         "${DOCKER_COMPOSE[@]}" down > /dev/null 2>&1
 
@@ -165,31 +165,31 @@ fi
 
 ARGS=()
 
-# Proxy PHP commands to the "php" binary on the application container...
+# Прокси-команды PHP для двоичного файла «php» в контейнере приложения...
 if [ "$1" == "php" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail)
+        ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" "php" "$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
-# Proxy vendor binary commands on the application container...
+# Бинарные команды поставщика прокси в контейнере приложения...
 elif [ "$1" == "bin" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail)
+        ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" ./vendor/bin/"$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
-# Proxy docker-compose commands to the docker-compose binary on the application container...
+# Прокси-команды docker-compose для двоичного файла docker-compose в контейнере приложения...
 elif [ "$1" == "docker-compose" ]; then
     shift 1
 
@@ -198,31 +198,31 @@ elif [ "$1" == "docker-compose" ]; then
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" "${DOCKER_COMPOSE[@]}")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
-# Proxy Composer commands to the "composer" binary on the application container...
+# Команды Proxy Composer для двоичного файла "composer" в контейнере приложения...
 elif [ "$1" == "composer" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail)
+        ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" "composer" "$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
-# Proxy Artisan commands to the "artisan" binary on the application container...
-elif [ "$1" == "artisan" ] || [ "$1" == "art" ]; then
+# Прокси-команды Darksander для двоичного файла «darksander» в контейнере приложения...
+elif [ "$1" == "darksander" ] || [ "$1" == "drs" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail)
+        ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" php artisan "$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Proxy the "debug" command to the "php artisan" binary on the application container with xdebug enabled...
@@ -230,11 +230,11 @@ elif [ "$1" == "debug" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail -e XDEBUG_SESSION=1)
+        ARGS+=(exec -u dpot -e XDEBUG_SESSION=1)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" php artisan "$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Proxy the "test" command to the "php artisan test" Artisan command...
@@ -242,11 +242,11 @@ elif [ "$1" == "test" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail)
+        ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" php artisan test "$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Proxy the "phpunit" command to "php vendor/bin/phpunit"...
@@ -254,11 +254,11 @@ elif [ "$1" == "phpunit" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail)
+        ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" php vendor/bin/phpunit "$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Proxy the "pint" command to "php vendor/bin/pint"...
@@ -266,11 +266,11 @@ elif [ "$1" == "pint" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail)
+        ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" php vendor/bin/pint "$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Proxy the "dusk" command to the "php artisan dusk" Artisan command...
@@ -278,13 +278,13 @@ elif [ "$1" == "dusk" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail)
+        ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=(-e "APP_URL=http://${APP_SERVICE}")
         ARGS+=(-e "DUSK_DRIVER_URL=http://selenium:4444/wd/hub")
         ARGS+=("$APP_SERVICE" php artisan dusk "$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Proxy the "dusk:fails" command to the "php artisan dusk:fails" Artisan command...
@@ -292,13 +292,13 @@ elif [ "$1" == "dusk:fails" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail)
+        ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=(-e "APP_URL=http://${APP_SERVICE}")
         ARGS+=(-e "DUSK_DRIVER_URL=http://selenium:4444/wd/hub")
         ARGS+=("$APP_SERVICE" php artisan dusk:fails "$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Initiate a Laravel Tinker session within the application container...
@@ -306,11 +306,11 @@ elif [ "$1" == "tinker" ] ; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail)
+        ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" php artisan tinker)
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Proxy Node commands to the "node" binary on the application container...
@@ -318,11 +318,11 @@ elif [ "$1" == "node" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail)
+        ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" node "$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Proxy NPM commands to the "npm" binary on the application container...
@@ -330,11 +330,11 @@ elif [ "$1" == "npm" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail)
+        ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" npm "$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Proxy NPX commands to the "npx" binary on the application container...
@@ -342,11 +342,11 @@ elif [ "$1" == "npx" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail)
+        ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" npx "$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Proxy YARN commands to the "yarn" binary on the application container...
@@ -354,11 +354,11 @@ elif [ "$1" == "yarn" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail)
+        ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" yarn "$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Initiate a MySQL CLI terminal session within the "mysql" container...
@@ -371,7 +371,7 @@ elif [ "$1" == "mysql" ]; then
         ARGS+=(mysql bash -c)
         ARGS+=("MYSQL_PWD=\${MYSQL_PASSWORD} mysql -u \${MYSQL_USER} \${MYSQL_DATABASE}")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Initiate a MySQL CLI terminal session within the "mariadb" container...
@@ -384,7 +384,7 @@ elif [ "$1" == "mariadb" ]; then
         ARGS+=(mariadb bash -c)
         ARGS+=("MYSQL_PWD=\${MYSQL_PASSWORD} mysql -u \${MYSQL_USER} \${MYSQL_DATABASE}")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Initiate a PostgreSQL CLI terminal session within the "pgsql" container...
@@ -397,7 +397,7 @@ elif [ "$1" == "psql" ]; then
         ARGS+=(pgsql bash -c)
         ARGS+=("PGPASSWORD=\${PGPASSWORD} psql -U \${POSTGRES_USER} \${POSTGRES_DB}")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Initiate a Bash shell within the application container...
@@ -405,11 +405,11 @@ elif [ "$1" == "shell" ] || [ "$1" == "bash" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
-        ARGS+=(exec -u sail)
+        ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" bash "$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Initiate a root user Bash shell within the application container...
@@ -421,7 +421,7 @@ elif [ "$1" == "root-shell" ] || [ "$1" == "root-bash" ]; then
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=("$APP_SERVICE" bash "$@")
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Initiate a Redis CLI terminal session within the "redis" container...
@@ -433,7 +433,7 @@ elif [ "$1" == "redis" ] ; then
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=(redis redis-cli)
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Share the site...
@@ -450,7 +450,7 @@ elif [ "$1" == "share" ]; then
 
         exit
     else
-        sail_is_not_running
+        dpot_is_not_running
     fi
 
 # Pass unknown commands to the "docker-compose" binary...
