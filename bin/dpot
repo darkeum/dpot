@@ -45,8 +45,8 @@ function display_help {
     echo "  ${GREEN}dpot ps${NC}        Показать статус docker контейнеров"
     echo
     echo "${YELLOW}Команды darksander:${NC}"
-    echo "  ${GREEN}dpot artisan ...${NC}          Выполнить darksander команду"
-    echo "  ${GREEN}dpot artisan queue:work${NC}"
+    echo "  ${GREEN}dpot darksander ...${NC}          Выполнить darksander команду"
+    echo "  ${GREEN}dpot darksander queue:work${NC}"
     echo
     echo "${YELLOW}Команды PHP:${NC}"
     echo "  ${GREEN}dpot php ...${NC}   Выполнить PHP скрипт"
@@ -220,36 +220,36 @@ elif [ "$1" == "darksander" ] || [ "$1" == "drs" ]; then
     if [ "$EXEC" == "yes" ]; then
         ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
-        ARGS+=("$APP_SERVICE" php artisan "$@")
+        ARGS+=("$APP_SERVICE" php darksander "$@")
     else
         dpot_is_not_running
     fi
 
-# Proxy the "debug" command to the "php artisan" binary on the application container with xdebug enabled...
+# Проксирование команды "debug" в двоичный файл "php darksander" в контейнере приложения с включенным xdebug...
 elif [ "$1" == "debug" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
         ARGS+=(exec -u dpot -e XDEBUG_SESSION=1)
         [ ! -t 0 ] && ARGS+=(-T)
-        ARGS+=("$APP_SERVICE" php artisan "$@")
+        ARGS+=("$APP_SERVICE" php darksander "$@")
     else
         dpot_is_not_running
     fi
 
-# Proxy the "test" command to the "php artisan test" Artisan command...
+# Проксирование команды  "test" в двоичный файл "php darksander test"...
 elif [ "$1" == "test" ]; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
         ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
-        ARGS+=("$APP_SERVICE" php artisan test "$@")
+        ARGS+=("$APP_SERVICE" php darksander test "$@")
     else
         dpot_is_not_running
     fi
 
-# Proxy the "phpunit" command to "php vendor/bin/phpunit"...
+# Проксирование команды  "phpunit" в "php vendor/bin/phpunit"...
 elif [ "$1" == "phpunit" ]; then
     shift 1
 
@@ -261,7 +261,7 @@ elif [ "$1" == "phpunit" ]; then
         dpot_is_not_running
     fi
 
-# Proxy the "pint" command to "php vendor/bin/pint"...
+# Проксирование команды "pint" в "php vendor/bin/pint"...
 elif [ "$1" == "pint" ]; then
     shift 1
 
@@ -273,7 +273,7 @@ elif [ "$1" == "pint" ]; then
         dpot_is_not_running
     fi
 
-# Proxy the "dusk" command to the "php artisan dusk" Artisan command...
+# Проксирование команды "dusk" в "php darksander dusk"...
 elif [ "$1" == "dusk" ]; then
     shift 1
 
@@ -282,12 +282,12 @@ elif [ "$1" == "dusk" ]; then
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=(-e "APP_URL=http://${APP_SERVICE}")
         ARGS+=(-e "DUSK_DRIVER_URL=http://selenium:4444/wd/hub")
-        ARGS+=("$APP_SERVICE" php artisan dusk "$@")
+        ARGS+=("$APP_SERVICE" php darksander dusk "$@")
     else
         dpot_is_not_running
     fi
 
-# Proxy the "dusk:fails" command to the "php artisan dusk:fails" Artisan command...
+# Проксирование команды "dusk:fails" в "php darksander dusk:fails"  
 elif [ "$1" == "dusk:fails" ]; then
     shift 1
 
@@ -296,24 +296,24 @@ elif [ "$1" == "dusk:fails" ]; then
         [ ! -t 0 ] && ARGS+=(-T)
         ARGS+=(-e "APP_URL=http://${APP_SERVICE}")
         ARGS+=(-e "DUSK_DRIVER_URL=http://selenium:4444/wd/hub")
-        ARGS+=("$APP_SERVICE" php artisan dusk:fails "$@")
+        ARGS+=("$APP_SERVICE" php darksander dusk:fails "$@")
     else
         dpot_is_not_running
     fi
 
-# Initiate a Laravel Tinker session within the application container...
+# Инициировать сеанс Darklyy Tinker в контейнере приложения...
 elif [ "$1" == "tinker" ] ; then
     shift 1
 
     if [ "$EXEC" == "yes" ]; then
         ARGS+=(exec -u dpot)
         [ ! -t 0 ] && ARGS+=(-T)
-        ARGS+=("$APP_SERVICE" php artisan tinker)
+        ARGS+=("$APP_SERVICE" php darksander tinker)
     else
         dpot_is_not_running
     fi
 
-# Proxy Node commands to the "node" binary on the application container...
+# Проксирование команды Node в двоичный файл "node" в контейнере приложения...
 elif [ "$1" == "node" ]; then
     shift 1
 
@@ -325,7 +325,7 @@ elif [ "$1" == "node" ]; then
         dpot_is_not_running
     fi
 
-# Proxy NPM commands to the "npm" binary on the application container...
+# Проксирование команды NPM в двоичный файл "npm" binary в контейнере приложения...
 elif [ "$1" == "npm" ]; then
     shift 1
 
@@ -337,7 +337,7 @@ elif [ "$1" == "npm" ]; then
         dpot_is_not_running
     fi
 
-# Proxy NPX commands to the "npx" binary on the application container...
+# Проксирование команды NPX в двоичный файл "npx" binary в контейнере приложения...
 elif [ "$1" == "npx" ]; then
     shift 1
 
@@ -349,7 +349,7 @@ elif [ "$1" == "npx" ]; then
         dpot_is_not_running
     fi
 
-# Proxy YARN commands to the "yarn" binary on the application container...
+# Проксирование команды YARN в двоичный файл "yarn" binary в контейнере приложения...
 elif [ "$1" == "yarn" ]; then
     shift 1
 
@@ -361,7 +361,7 @@ elif [ "$1" == "yarn" ]; then
         dpot_is_not_running
     fi
 
-# Initiate a MySQL CLI terminal session within the "mysql" container...
+# Инициировать сеанс терминала MySQL CLI в контейнере "mysql"...
 elif [ "$1" == "mysql" ]; then
     shift 1
 
@@ -374,7 +374,7 @@ elif [ "$1" == "mysql" ]; then
         dpot_is_not_running
     fi
 
-# Initiate a MySQL CLI terminal session within the "mariadb" container...
+# Инициировать сеанс терминала MySQL CLI в контейнере "mariadb"...
 elif [ "$1" == "mariadb" ]; then
     shift 1
 
@@ -387,7 +387,7 @@ elif [ "$1" == "mariadb" ]; then
         dpot_is_not_running
     fi
 
-# Initiate a PostgreSQL CLI terminal session within the "pgsql" container...
+# Инициировать сеанс терминала PostgreSQL CLI в контейнере "pgsql"...
 elif [ "$1" == "psql" ]; then
     shift 1
 
@@ -400,7 +400,7 @@ elif [ "$1" == "psql" ]; then
         dpot_is_not_running
     fi
 
-# Initiate a Bash shell within the application container...
+# Инициировать оболочку Bash в контейнере приложения...
 elif [ "$1" == "shell" ] || [ "$1" == "bash" ]; then
     shift 1
 
@@ -412,7 +412,7 @@ elif [ "$1" == "shell" ] || [ "$1" == "bash" ]; then
         dpot_is_not_running
     fi
 
-# Initiate a root user Bash shell within the application container...
+# Инициировать оболочку Bash пользователя root в контейнере приложения...
 elif [ "$1" == "root-shell" ] || [ "$1" == "root-bash" ]; then
     shift 1
 
@@ -424,7 +424,7 @@ elif [ "$1" == "root-shell" ] || [ "$1" == "root-bash" ]; then
         dpot_is_not_running
     fi
 
-# Initiate a Redis CLI terminal session within the "redis" container...
+# Инициировать сеанс терминала Redis CLI в контейнере "redis"...
 elif [ "$1" == "redis" ] ; then
     shift 1
 
@@ -436,7 +436,7 @@ elif [ "$1" == "redis" ] ; then
         dpot_is_not_running
     fi
 
-# Share the site...
+# Поделитесь сайтом...
 elif [ "$1" == "share" ]; then
     shift 1
 
@@ -453,10 +453,10 @@ elif [ "$1" == "share" ]; then
         dpot_is_not_running
     fi
 
-# Pass unknown commands to the "docker-compose" binary...
+# Передать неизвестные команды в двоичный файл "docker-compose"...
 else
     ARGS+=("$@")
 fi
 
-# Run Docker Compose with the defined arguments...
+# Запустить Docker Compose с заданными аргументами...
 "${DOCKER_COMPOSE[@]}" "${ARGS[@]}"

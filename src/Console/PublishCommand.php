@@ -21,7 +21,7 @@ class PublishCommand extends Command
     protected $description = 'Публикация Docker файла для Darklyy';
 
     /**
-     * Execute the console command.
+     * Выполнение консольной команды.
      *
      * @return void
      */
