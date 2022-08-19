@@ -49,7 +49,8 @@ RUN curl -sLS https://deb.nodesource.com/setup_$NODE_VERSION.x | bash - \
     && curl -sS https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /usr/share/keyrings/pgdg.gpg >/dev/null \
     && echo "deb [signed-by=/usr/share/keyrings/pgdg.gpg] http://apt.postgresql.org/pub/repos/apt jammy-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
     && apt-get update \
-    && apt-get install -y yarn 
+    && apt-get install -y yarn \
+    && apt-get install -y libreoffice 
 
 # Очитка кэша
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
